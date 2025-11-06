@@ -1,0 +1,64 @@
+{% extends "base.html" %}
+
+{% block title %}
+{{ turma.materia }} | Detalhes
+{% endblock %}
+
+{% block conteudo %}
+<main class="detalhes-turma">
+    <h1>{{ turma.materia }} ({{ turma.curso }})</h1>
+    <p>Professor(a): <strong>{{ turma.professor.name }}</strong></p>
+    <p>Vagas disponíveis: <strong>{{ turma.calcular_vagas() }}</strong> de {{ turma.vagas }}</p>
+
+    {% if is_professor %}
+    <div class="actions-container mb-4">
+        <h2>Ações do Professor</h2>
+        <a href="{{ url_for('inserir_conteudo_web', registro_turma=turma.registro_turma) }}"
+            class="action-button primary-btn">
+            ➕ Inserir Nova Aula/Atividade
+        </a>
+    </div>
+    {% endif %}
+
+    <section class="content-section">
+        <h2>📜 Aulas Inseridas</h2>
+        {% if aulas %}
+        <ul class="content-list">
+            {% for aula in aulas %}
+            <li class="content-item">
+                <h4>{{ aula.descricao | truncate(50) }}</h4>
+                <p>Data: <strong>{{ aula.data }}</strong></p>
+            </li>
+            {% endfor %}
+        </ul>
+        {% else %}
+        <p class="no-content-message">Nenhuma aula foi inserida nesta turma ainda.</p>
+        {% endif %}
+    </section>
+
+    <section class="content-section">
+        <h2>📝 Atividades e Trabalhos</h2>
+        {% if atividades %}
+        <ul class="content-list">
+            {% for atividade in atividades %}
+            <li class="content-item activity-item">
+                <h4>{{ atividade.nome }}</h4>
+                <p>Prazo: <strong>{{ atividade.data_entrega }}</strong></p>
+                <p>Descrição: {{ atividade.descricao | truncate(100) }}</p>
+
+                <a href="{{ atividade.anexo }}" target="_blank" class="download-link">
+                    ⬇️ Baixar Anexo (PDF)
+                </a>
+            </li>
+            {% endfor %}
+        </ul>
+        {% else %}
+        <p class="no-content-message">Nenhuma atividade pendente.</p>
+        {% endif %}
+    </section>
+
+    <div class="form-actions mt-5">
+        <a href="{{ url_for('dashboard') }}" class="back-link">Voltar ao Dashboard</a>
+    </div>
+</main>
+{% endblock %}

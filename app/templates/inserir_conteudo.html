@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+
+{% block title %}
+{{ titulo }}
+{% endblock %}
+
+{% block conteudo %}
+<main class="inserir-conteudo-form">
+    <h1>✏️ {{ titulo }}</h1>
+    <p>Você está adicionando conteúdo para a disciplina: <strong>{{ turma.materia }}</strong></p>
+
+    <form method="POST" action="{{ url_for('inserir_conteudo_web', registro_turma=turma.registro_turma) }}">
+
+        <label for="tipo_conteudo">O que você está inserindo?</label>
+        <select id="tipo_conteudo" name="tipo_conteudo" required onchange="toggleFields()">
+            <option value="" disabled selected>Escolha o tipo</option>
+            <option value="aula">Aula</option>
+            <option value="atividade">Atividade</option>
+        </select>
+
+        <label for="data">Data (DD/MM/AAAA):</label>
+        <input type="text" id="data" name="data" required placeholder="Ex: 15/03/2026">
+
+        <label for="descricao">Descrição / Detalhes:</label>
+        <textarea id="descricao" name="descricao" rows="4" required></textarea>
+
+        <div id="atividade_fields"
+            style="display: none; border-top: 1px solid #ccc; padding-top: 15px; margin-top: 15px;">
+            <h2>Detalhes da Atividade</h2>
+            <label for="nome_atividade">Nome da Atividade:</label>
+            <input type="text" id="nome_atividade" name="nome_atividade" placeholder="Ex: Trabalho Final POO">
+
+            <label for="anexo_pdf">Link/Caminho do PDF (Anexo):</label>
+            <input type="text" id="anexo_pdf" name="anexo_pdf" placeholder="URL ou Caminho do arquivo">
+        </div>
+
+        <div class="form-actions mt-4">
+            <button type="submit" class="primary-btn">Salvar Conteúdo</button>
+            <a href="{{ url_for('gerenciar_conteudo_menu') }}" class="back-link">Voltar</a>
+        </div>
+    </form>
+</main>
+
+<script>
+    function toggleFields() {
+        const tipo = document.getElementById('tipo_conteudo').value;
+        const atividadeDiv = document.getElementById('atividade_fields');
+
+        if (tipo === 'atividade') {
+            atividadeDiv.style.display = 'block';
+            document.getElementById('nome_atividade').required = true;
+        } else {
+            atividadeDiv.style.display = 'none';
+            document.getElementById('nome_atividade').required = false;
+        }
+    }
+</script>
+{% endblock %}

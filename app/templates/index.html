@@ -1,0 +1,73 @@
+{% extends "base.html" %}
+
+{% block title %}
+Dashboard | {{ titulo }}
+{% endblock %}
+
+{% block conteudo %}
+<main class="dashboard">
+    <h1>🎓 {{ titulo }}</h1>
+    <p>Olá, <strong>{{ usuario_logado }}</strong> ({{ funcao_logado | upper }}). Seja bem-vindo(a)!</p>
+
+    <section class="stats-container">
+        <div class="stat-card primary">
+            <h2>Total de Usuários</h2>
+            <p class="stat-number">{{ total_usuarios }}</p>
+        </div>
+        <div class="stat-card success">
+            <h2>Turmas Ativas</h2>
+            <p class="stat-number">{{ turmas | length }}</p>
+        </div>
+    </section>
+
+    <section class="actions-container">
+        <h2>Ações Específicas</h2>
+        <nav class="action-links">
+            {% if funcao_logado == 'professor' %}
+            <a href="{{ url_for('criar_turma_web') }}" class="action-button primary-btn">➕ Criar Nova Turma</a>
+
+            <a href="{{ url_for('gerenciar_conteudo_menu') }}" class="action-button info">📚 Gerenciar
+                Aulas/Atividades</a>
+            {% else %}
+            <a href="#" class="action-button info">📋 Ver Minhas Matrículas</a>
+            {% endif %}
+
+            <a href="{{ url_for('logout') }}" class="action-button danger">↩️ Sair (Logout)</a>
+        </nav>
+    </section>
+
+    <section class="turmas-list">
+        <h2>Turmas Disponíveis</h2>
+        {% if turmas %}
+        <ul class="turma-cards">
+            {% for turma_dados in turmas %}
+            <li class="turma-item">
+                <div class="turma-info">
+                    <h3>{{ turma_dados.materia }} ({{ turma_dados.curso }})</h3>
+                    <p>Professor: <strong>{{ turma_dados.professor }}</strong></p>
+                    <p>Vagas: **{{ turma_dados.vagas_restantes }}**</p>
+                </div>
+
+                {% if funcao_logado == 'aluno' %}
+                {% if turma_dados.vagas_restantes > 0 %}
+                <form method="POST" action="{{ url_for('entrar_turma_web', registro_turma=turma_dados.registro) }}">
+                    <button type="submit" class="action-button primary-btn turma-action">Matricular</button>
+                </form>
+                {% else %}
+                <span class="action-button disabled-btn">Lotada</span>
+                {% endif %}
+                {% endif %}
+
+                <a href="{{ url_for('detalhes_turma', registro_turma=turma_dados.registro) }}"
+                    class="turma-details-link">
+                    Ver Conteúdo
+                </a>
+            </li>
+            {% endfor %}
+        </ul>
+        {% else %}
+        <p class="no-turmas-message">Nenhuma turma cadastrada ainda.</p>
+        {% endif %}
+    </section>
+</main>
+{% endblock %}

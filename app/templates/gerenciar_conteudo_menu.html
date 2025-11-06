@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+
+{% block title %}
+{{ titulo }}
+{% endblock %}
+
+{% block conteudo %}
+<main class="gerenciamento-menu">
+    <h1>📚 {{ titulo }}</h1>
+    <p>Selecione a turma que deseja editar:</p>
+
+    {% if turmas %}
+    <ul class="turma-cards">
+        {% for turma in turmas %}
+        <li class="turma-item">
+            <div class="turma-info">
+                <h3>{{ turma.materia }} ({{ turma.curso }})</h3>
+                <p>Registro: {{ turma.registro_turma }}</p>
+            </div>
+            <a href="{{ url_for('inserir_conteudo_web', registro_turma=turma.registro_turma) }}"
+                class="turma-details-link primary-btn">
+                Inserir Conteúdo
+            </a>
+        </li>
+        {% endfor %}
+    </ul>
+    {% else %}
+    <p class="no-turmas-message">Você ainda não criou nenhuma turma.</p>
+    {% endif %}
+
+    <div class="form-actions mt-3">
+        <a href="{{ url_for('dashboard') }}" class="back-link">Voltar ao Dashboard</a>
+    </div>
+</main>
+{% endblock %}
