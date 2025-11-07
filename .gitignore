@@ -1,0 +1,11 @@
+# Virtual Environment
+venv/
+__pycache__/
+*.pyc
+
+# Flask
+.flaskenv
+instance/
+
+# Other
+.DS_Store
