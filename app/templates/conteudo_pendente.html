@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+
+{% block title %}
+Pendências | {{ aluno_nome }}
+{% endblock %}
+
+{% block conteudo %}
+<main class="pending-content-page">
+    <h1>🗓️ Minhas Atividades Pendentes</h1>
+    <p>Olá, {{ aluno_nome }}. Aqui está a lista consolidada de todos os trabalhos e atividades das suas turmas.</p>
+
+    <section class="atividades-list">
+        {% if atividades %}
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>Turma</th>
+                    <th>Atividade</th>
+                    <th>Descrição</th>
+                    <th>Entrega</th>
+                    <th>Ação</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for atividade in atividades %}
+                <tr class="{% if loop.index % 2 == 0 %}even{% else %}odd{% endif %}">
+                    <td>{{ atividade.turma_materia }}</td>
+                    <td><strong>{{ atividade.nome }}</strong></td>
+                    <td>{{ atividade.descricao[:50] }}...</td>
+                    <td><span class="due-date">{{ atividade.data_entrega }}</span></td>
+                    <td>
+                        <a href="{{ atividade.link_detalhes }}" class="action-button secondary-btn">
+                            Ver Detalhes
+                        </a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% else %}
+        <div class="alert alert-success">
+            🎉 Parabéns, {{ aluno_nome }}! Você não tem atividades pendentes registradas em suas turmas.
+        </div>
+        {% endif %}
+    </section>
+
+    <div class="form-actions mt-5">
+        <a href="{{ url_for('dashboard') }}" class="back-link">Voltar ao Dashboard</a>
+    </div>
+</main>
+{% endblock %}

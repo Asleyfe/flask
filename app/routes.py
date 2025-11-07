@@ -269,67 +269,89 @@ def detalhes_turma(registro_turma):
 
     return render_template('detalhes_turma.html', **contexto)
 
+
 # ----------------------------------------------------
-# 8. Rota: MENU DE GERENCIAMENTO DE CONTEÚDO (Professor)
+# 10. Rota: MINHAS TURMAS (Painel do Aluno)
 # ----------------------------------------------------
-@app.route('/gerenciar_conteudo')
-def gerenciar_conteudo_menu():
-    usuario_obj = mn.validar_login(session.get('matricula'))
-    if not usuario_obj or usuario_obj.funcao != 'professor':
-        flash('Acesso negado.', 'danger')
-        return redirect(url_for('dashboard'))
-        
-    # Obtém as turmas criadas pelo professor logado
-    turmas_do_professor = list(usuario_obj.turmas_criadas.values())
+@app.route('/aluno/minhas_turmas')
+def minhas_turmas_web():
+    usuario_obj = get_current_user()
     
-    contexto = {
-        'titulo': 'Gerenciar Conteúdo das Turmas',
-        'turmas': turmas_do_professor
-    }
-    return render_template('gerenciar_conteudo_menu.html', **contexto)
-# ----------------------------------------------------
-# 9. Rota: INSERIR CONTEÚDO (Aula ou Atividade)
-# ----------------------------------------------------
-@app.route('/inserir_conteudo/<registro_turma>', methods=['GET', 'POST'])
-def inserir_conteudo_web(registro_turma):
-    usuario_obj = mn.validar_login(session.get('matricula'))
-    if not usuario_obj or usuario_obj.funcao != 'professor':
-        flash('Acesso negado.', 'danger')
-        return redirect(url_for('dashboard'))
-
-    turma = mn.TODAS_TURMAS.get(registro_turma)
-    if not turma or turma.professor.matricula != usuario_obj.matricula:
-        flash('Turma não encontrada ou você não tem permissão para editá-la.', 'danger')
-        return redirect(url_for('gerenciar_conteudo_menu'))
-
-    if request.method == 'POST':
-        # Determina qual formulário foi submetido (Aula ou Atividade)
-        tipo_submissao = request.form.get('tipo_submissao')
-
-        if tipo_submissao == 'aula':
-            data_str = request.form.get('data_aula')
-            descricao = request.form.get('descricao_aula')
-            
-            sucesso, mensagem = usuario_obj.inserir_aula(registro_turma, data_str, descricao)
-            flash(mensagem, 'success' if sucesso else 'danger')
-            return redirect(url_for('detalhes_turma', registro_turma=registro_turma))
-
-        elif tipo_submissao == 'atividade':
-            nome_atividade = request.form.get('nome_atividade')
-            data_entrega_str = request.form.get('data_entrega')
-            anexo_pdf = request.form.get('anexo_pdf')
-            descricao_atividade = request.form.get('descricao_atividade')
-
-            sucesso, mensagem = usuario_obj.criar_atividade_nova(
-                registro_turma, nome_atividade, data_entrega_str, anexo_pdf, descricao_atividade
-            )
-            flash(mensagem, 'success' if sucesso else 'danger')
-            return redirect(url_for('detalhes_turma', registro_turma=registro_turma))
+    # 1. Proteção: requer login e ser aluno
+    if not usuario_obj:
+        flash('Você precisa fazer login para acessar esta página.', 'info')
+        return redirect(url_for('inicio'))
         
-        else:
-             flash('Tipo de submissão desconhecido.', 'danger')
+    if usuario_obj.funcao != 'aluno':
+        flash('Acesso restrito a Alunos.', 'danger')
+        return redirect(url_for('dashboard'))
+    
+    # Já sabemos que é um objeto Aluno, podemos acessar a propriedade turmas_matriculadas
+    aluno_obj = usuario_obj
+    
+    # Prepara os dados: queremos uma lista dos objetos Turma
+    turmas_matriculadas = list(aluno_obj.turmas_matriculadas.values())
+    
+    # Prepara os detalhes de cada turma para o template
+    turmas_detalhes = []
+    for turma in turmas_matriculadas:
+        turmas_detalhes.append({
+            'registro': turma.registro_turma,
+            'materia': turma.materia,
+            'curso': turma.curso,
+            'professor': turma.professor.name,
+            'total_aulas': len(turma.aulas),
+            'total_atividades': len(turma.atividades)
+        })
 
-    return render_template('inserir_conteudo.html', turma=turma)
+    contexto = {
+        'titulo': 'Minhas Turmas Matriculadas',
+        'turmas': turmas_detalhes,
+        'aluno_nome': aluno_obj.name
+    }
+
+    return render_template('minhas_turmas.html', **contexto)
+# ----------------------------------------------------
+# 11. Rota: CONTEÚDO PENDENTE (Visão Agregada do Aluno)
+# ----------------------------------------------------
+@app.route('/aluno/conteudo_pendente')
+def conteudo_pendente_web():
+    usuario_obj = get_current_user()
+    
+    # Proteção: requer login e ser aluno
+    if not usuario_obj or usuario_obj.funcao != 'aluno':
+        flash('Acesso restrito a Alunos.', 'danger')
+        return redirect(url_for('dashboard'))
+        
+    aluno_obj = usuario_obj
+    
+    # ⚠️ ASSUMINDO que o método consultar_atividades_pendentes está no objeto Aluno
+    atividades = []
+    
+    # Lógica de coleta de todas as turmas e atividades pendentes
+    for turma in aluno_obj.turmas_matriculadas.values():
+        for atividade in turma.atividades:
+            # Em um sistema real, você checaria se o aluno já entregou
+            # Aqui, listamos todas as atividades para fins de demonstração da interface.
+            atividades.append({
+                'turma_materia': turma.materia,
+                'turma_registro': turma.registro_turma,
+                'nome': atividade.nome,
+                'data_entrega': atividade.data_entrega.strftime('%d/%m/%Y'),
+                'link_detalhes': url_for('detalhes_turma', registro_turma=turma.registro_turma),
+                'descricao': atividade.descricao
+            })
+
+    # Ordenar as atividades pela data de entrega (mais próximas primeiro)
+    # (Não podemos fazer isso sem o código de Turma/Atividade, mas é uma boa prática)
+
+    contexto = {
+        'titulo': 'Atividades Pendentes',
+        'atividades': atividades,
+        'aluno_nome': aluno_obj.name
+    }
+
+    return render_template('conteudo_pendente.html', **contexto)
 @app.route('/contato')
 def contato():
     return render_template('contato.html', titulo='Entre em Contato')

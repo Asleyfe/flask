@@ -24,12 +24,14 @@ Dashboard | {{ titulo }}
         <h2>Ações Específicas</h2>
         <nav class="action-links">
             {% if funcao_logado == 'professor' %}
-            <a href="{{ url_for('criar_turma_web') }}" class="action-button primary-btn">➕ Criar Nova Turma</a>
+            <a href="{{ url_for('criar_turma_web') }}" class="action-button primary-btn">➕ Criar Nova
+                Turma</a>
 
             <a href="{{ url_for('gerenciar_conteudo_menu') }}" class="action-button info">📚 Gerenciar
                 Aulas/Atividades</a>
             {% else %}
-            <a href="#" class="action-button info">📋 Ver Minhas Matrículas</a>
+            <a href="{{ url_for('minhas_turmas_web') }}" class="action-button info">📋 Ver Minhas
+                Matrículas</a>
             {% endif %}
 
             <a href="{{ url_for('logout') }}" class="action-button danger">↩️ Sair (Logout)</a>

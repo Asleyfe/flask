@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+
+{% block title %}
+Minhas Turmas | Aluno
+{% endblock %}
+
+{% block conteudo %}
+<main class="minhas-turmas-dashboard">
+    <h1>📋 Turmas de {{ aluno_nome }}</h1>
+    <p>Aqui estão todas as turmas em que você está matriculado(a):</p>
+
+    <section class="turmas-list">
+        <h2>Conteúdo por Turma</h2>
+        {% if turmas %}
+        <ul class="turma-cards">
+            {% for turma in turmas %}
+            <li class="turma-item aluno-turma-item">
+                <div class="turma-info">
+                    <h3>{{ turma.materia }} ({{ turma.curso }})</h3>
+                    <p>Professor: <strong>{{ turma.professor }}</strong></p>
+                    <p>Aulas Publicadas: {{ turma.total_aulas }}</p>
+                    <p>Atividades Pendentes: {{ turma.total_atividades }}</p>
+                </div>
+
+                <a href="{{ url_for('detalhes_turma', registro_turma=turma.registro) }}" class="action-button info">
+                    Ver Conteúdo Detalhado
+                </a>
+            </li>
+            {% endfor %}
+        </ul>
+        {% else %}
+        <div class="alert alert-warning">
+            Você ainda não está matriculado(a) em nenhuma turma.
+            <a href="{{ url_for('dashboard') }}">Volte ao Dashboard</a> para se matricular!
+        </div>
+        {% endif %}
+    </section>
+
+    <div class="form-actions mt-5">
+        <a href="{{ url_for('dashboard') }}" class="back-link">Voltar ao Dashboard</a>
+    </div>
+</main>
+{% endblock %}

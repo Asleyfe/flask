@@ -200,6 +200,22 @@ class Aluno(User):
                 if atividade.name_atividade == nome_atividade:
                     return atividade
         return None
+    def consultar_atividades_pendentes(self):
+        atividades_pendentes = []
+        for turma_registro in self.turmas_matriculadas:
+            turma = TODAS_TURMAS.get(turma_registro)
+            if turma:
+                for atividade in turma.atividades:
+                    # Implemente a lógica para verificar se a atividade está concluída pelo aluno
+                    # Por simplicidade, neste exemplo, listamos todas as atividades
+                    atividades_pendentes.append({
+                        'turma': turma.materia,
+                        'nome': atividade.nome,
+                        'data_entrega': atividade.data_entrega.strftime('%d/%m/%Y'),
+                        'link': atividade.anexo_pdf,
+                        'descricao': atividade.descricao
+                    })
+        return atividades_pendentes
 
 # --- Funções de Gerenciamento do Sistema (Usadas pelas Rotas Flask) ---
 
